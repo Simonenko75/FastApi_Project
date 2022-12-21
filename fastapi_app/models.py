@@ -44,7 +44,6 @@ class Posts(Base):
     author = Column(String, ForeignKey("users.first_name"), default="Nikita75")
     content = Column(String)
     completed = Column(Boolean)
-    user_id = Column(Integer, ForeignKey("users.id"))
     created_at = Column(String, default=datetime.utcnow())
 
 

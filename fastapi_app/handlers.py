@@ -7,7 +7,7 @@ from sqlalchemy import update, delete
 
 from fastapi_app.forms import UserLoginForm, UserCreateForm, PostCreateForm
 from fastapi_app.models import connect_db, User, AuthToken, Posts
-from fastapi_app.utils import get_password_hash
+from fastapi_app.utils import get_password_hash, result_user, result_post
 from fastapi_app.auth import check_auth_token
 
 
@@ -20,9 +20,33 @@ def read_root():
 
 
 @router.get("/get/user/by/token")
-def get_user(token: AuthToken = Depends(check_auth_token), database=Depends(connect_db)):
+def get_user_by_token(token: AuthToken = Depends(check_auth_token), database=Depends(connect_db)):
     user = database.query(User).filter(User.id == token.user_id).one_or_none()
     return {"id": user.id, "email": user.email, "nickname": user.nickname}
+
+
+@router.get("/get/user/by/id/{user_id}")
+def get_user_by_id(user_id: int, database=Depends(connect_db)):
+    user = database.query(User).filter(User.id == user_id).one_or_none()
+
+    try:
+        result = result_user(user_id, user)
+    except:
+        return "No user as this in DB!"
+
+    return result
+
+
+@router.get("/get/post/by/id/{post_id}")
+def get_post_by_id(post_id: int, database=Depends(connect_db)):
+    post = database.query(Posts).filter(Posts.id == post_id).one_or_none()
+
+    try:
+        result = result_post(post_id, post)
+    except:
+        return "No user as this in DB!"
+
+    return result
 
 
 @router.post("/login")
@@ -39,7 +63,7 @@ def login(user_form: UserLoginForm = Body(..., embed=True), database=Depends(con
 
 @router.post("/create/user")
 def create_user(user: UserCreateForm = Body(..., ember=True), database=Depends(connect_db)):
-    exists_user = database.query(User.id).filter(User.email == user.email).one_or_none()
+    exists_user = database.query(User).filter(User.email == user.email).one_or_none()
     if exists_user:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already exists")
 
@@ -53,7 +77,13 @@ def create_user(user: UserCreateForm = Body(..., ember=True), database=Depends(c
     database.add(new_user)
     database.commit()
 
-    return {"user_id": new_user.id}
+    user1 = database.query(User).filter(User.email == user.email).one_or_none()
+    try:
+        result = result_user(user1.id, user)
+    except:
+        return "No post as this in DB!"
+
+    return result
 
 
 @router.post("/create/post")
@@ -69,7 +99,13 @@ def create_post(post: PostCreateForm = Body(..., ember=True), database=Depends(c
     database.add(new_post)
     database.commit()
 
-    return {"post_title": new_post.title}
+    post1 = database.query(Posts).filter(Posts.content == post.content).one_or_none()
+    try:
+        result = result_post(post1.id, post)
+    except:
+        return "No post as this in DB!"
+
+    return result
 
 
 @router.put("/update/user/{user_id}")
@@ -89,11 +125,12 @@ def update_user(user_id: int, user: UserCreateForm = Body(..., ember=True), data
     database.execute(stmt)
     database.commit()
 
-    return {
-        "user_email": user.email,
-        "user_password": user.password,
-        "user_created": user.nickname,
-    }
+    try:
+        result = result_user(user_id, user)
+    except:
+        return "No user as this in DB!"
+
+    return result
 
 
 @router.put("/update/post/{post_id}")
@@ -113,11 +150,12 @@ def update_post(post_id: int, post: PostCreateForm = Body(..., ember=True), data
     database.execute(stmt)
     database.commit()
 
-    return {
-        "post_title": post.title,
-        "post_author": post.author,
-        "post_content": post.content,
-    }
+    try:
+        result = result_post(post_id, post)
+    except:
+        return "No user as this in DB!"
+
+    return result
 
 
 @router.delete("/delete/user/{user_id}")
