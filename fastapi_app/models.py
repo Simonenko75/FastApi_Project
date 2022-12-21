@@ -1,6 +1,5 @@
 from datetime import datetime
 from enum import Enum
-from pydantic import BaseModel
 
 from sqlalchemy import create_engine, Column, Integer, String, Boolean, ForeignKey
 from sqlalchemy.orm import Session
@@ -43,9 +42,10 @@ class Posts(Base):
     title = Column(String)
     subtitle = Column(String)
     author = Column(String, ForeignKey("users.first_name"), default="Nikita75")
-    created_at = Column(String, default=datetime.utcnow())
     content = Column(String)
     completed = Column(Boolean)
+    user_id = Column(Integer, ForeignKey("users.id"))
+    created_at = Column(String, default=datetime.utcnow())
 
 
 class Stream(Base):
@@ -66,21 +66,3 @@ class AuthToken(Base):
     token = Column(String)
     user_id = Column(Integer, ForeignKey("users.id"))
     created_at = Column(String, default=datetime.utcnow())
-
-
-# class Post(BaseModel):
-#     id: int
-#     title: str
-#     subtitle: str
-#     author: str
-#     date: datetime.utcnow()
-#     content: str
-#     completed: bool
-#
-#
-# class PostInput(BaseModel):
-#     title: str
-#     subtitle: str
-#     content: str
-#     completed: bool
-

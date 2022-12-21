@@ -1,6 +1,9 @@
 import uuid
+from datetime import datetime
 from fastapi import APIRouter, Body, Depends, HTTPException
 from starlette import status
+
+from sqlalchemy import update, delete, select
 
 from fastapi_app.forms import UserLoginForm, UserCreateForm, PostCreateForm
 from fastapi_app.models import connect_db, User, AuthToken, Posts
@@ -16,6 +19,12 @@ def read_root():
     return {"Hello": "World!!!"}
 
 
+@router.get("/get/user/by/token", name="user:get")
+def get_user(token: AuthToken = Depends(check_auth_token), database=Depends(connect_db)):
+    user = database.query(User).filter(User.id == token.user_id).one_or_none()
+    return {"id": user.id, "email": user.email, "nickname": user.nickname}
+
+
 @router.post("/login", name="user:login")
 def login(user_form: UserLoginForm = Body(..., embed=True), database=Depends(connect_db)):
     user = database.query(User).filter(User.email == user_form.email).one_or_none()
@@ -28,7 +37,7 @@ def login(user_form: UserLoginForm = Body(..., embed=True), database=Depends(con
     return {"auth_token": auth_token.token}
 
 
-@router.post("/user", name="user:create")
+@router.post("/create/user", name="user:create")
 def create_user(user: UserCreateForm = Body(..., ember=True), database=Depends(connect_db)):
     exists_user = database.query(User.id).filter(User.email == user.email).one_or_none()
     if exists_user:
@@ -47,7 +56,7 @@ def create_user(user: UserCreateForm = Body(..., ember=True), database=Depends(c
     return {"user_id": new_user.id}
 
 
-@router.post("/post", name="post:create")
+@router.post("/create/post", name="post:create")
 def create_post(post: PostCreateForm = Body(..., ember=True), database=Depends(connect_db)):
 
     new_post = Posts(
@@ -63,8 +72,77 @@ def create_post(post: PostCreateForm = Body(..., ember=True), database=Depends(c
     return {"post_title": new_post.title}
 
 
-@router.get("/user", name="user:get")
-def get_user(token: AuthToken = Depends(check_auth_token), database=Depends(connect_db)):
-    user = database.query(User).filter(User.id == token.user_id).one_or_none()
-    return {"id": user.id, "email": user.email, "nickname": user.nickname}
+@router.put("/update/user/{user_id}")
+def update_sensor(user_id: int, user: UserCreateForm = Body(..., ember=True), database=Depends(connect_db)):
+    stmt = (
+        update(User)
+        .where(User.id == user_id)
+        .values(email=user.email)
+        .values(password=get_password_hash(user.password))
+        .values(first_name=user.first_name)
+        .values(last_name=user.last_name)
+        .values(nickname=user.nickname)
+        .values(created_at=datetime.now())
+        .execution_options(synchronize_session="fetch")
+    )
 
+    database.execute(stmt)
+    database.commit()
+
+    return {
+        "user_email": user.email,
+        "user_password": user.password,
+        "user_created": user.nickname,
+    }
+
+
+@router.put("/update/post/{post_id}")
+def update_sensor(post_id: int, post: PostCreateForm = Body(..., ember=True), database=Depends(connect_db)):
+    stmt = (
+        update(Posts)
+        .where(Posts.id == post_id)
+        .values(title=post.title)
+        .values(subtitle=post.subtitle)
+        .values(author=post.author)
+        .values(content=post.content,)
+        .values(completed=post.completed)
+        .values(created_at=datetime.now())
+        .execution_options(synchronize_session="fetch")
+    )
+
+    database.execute(stmt)
+    database.commit()
+
+    return {
+        "post_title": post.title,
+        "post_author": post.author,
+        "post_content": post.content,
+    }
+
+
+@router.delete("/delete/user/{user_id}")
+def delete_sensor(user_id: int, database=Depends(connect_db)):
+    stmt = (
+        delete(User)
+        .where(User.id == user_id)
+        .execution_options(synchronize_session="fetch")
+    )
+
+    database.execute(stmt)
+    database.commit()
+
+    return {"Result": f"Successful delete sensor with id: {user_id}"}
+
+
+@router.delete("/delete/post/{post_id}")
+def delete_sensor(post_id: int, database=Depends(connect_db)):
+    stmt = (
+        delete(Posts)
+        .where(Posts.id == post_id)
+        .execution_options(synchronize_session="fetch")
+    )
+
+    database.execute(stmt)
+    database.commit()
+
+    return {"Result": f"Successful delete sensor with id: {post_id}"}

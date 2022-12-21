@@ -1,12 +1,12 @@
-from unittest import TestCase
+import unittest
 from fastapi.testclient import TestClient
 
 from fastapi_app.main import app as web_app
 
 
-class APITestCase(TestCase):
+class APITestCase(unittest.TestCase):
 
-    def setUp(self):
+    def setUp(self) -> None:
         self.client = TestClient(web_app)
 
     def tearDown(self) -> None:
@@ -16,7 +16,7 @@ class APITestCase(TestCase):
         response = self.client.get("/")
         self.assertEqual(response.status_code, 200)
 
-    def test_create_user(self):
+    def test_create_user(self) -> None:
         user_data = {
             "user": {
                 "email": "testiggg@tgggs.com",
@@ -30,7 +30,7 @@ class APITestCase(TestCase):
         response = self.client.post("/users", json=user_data)
         self.assertEqual(response.status_code, 200)
 
-    def test_create_post(self):
+    def test_create_post(self) -> None:
         post_data = {
             "post": {
                 "title": "java",
@@ -43,3 +43,7 @@ class APITestCase(TestCase):
 
         response = self.client.post("/posts", json=post_data)
         self.assertEqual(response.status_code, 200)
+
+
+# if __name__ == '__main__':
+#     unittest.main()

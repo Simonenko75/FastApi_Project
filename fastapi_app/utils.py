@@ -1,4 +1,5 @@
 import hashlib
+
 from fastapi_app.config import SECRET_KEY
 
 
