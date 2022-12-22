@@ -21,7 +21,11 @@ def read_root():
 @router.get("/get/user/by/token")
 def get_user_by_token(token: AuthToken = Depends(check_auth_token), database=Depends(connect_db)):
     user = database.query(User).filter(User.id == token.user_id).one_or_none()
-    return {"id": user.id, "email": user.email, "nickname": user.nickname}
+    return {
+        "id": user.id,
+        "email": user.email,
+        "nickname": user.nickname
+    }
 
 
 @router.get("/get/user/by/id/{user_id}")
@@ -39,11 +43,12 @@ def get_user_by_id(user_id: int, database=Depends(connect_db)):
 @router.get("/get/post/by/id/{post_id}")
 def get_post_by_id(post_id: int, database=Depends(connect_db)):
     post = database.query(Posts).filter(Posts.id == post_id).one_or_none()
+    user = database.query(User).filter(User.email == post.author_email).one_or_none()
 
     try:
-        result = result_post(post_id, post)
+        result = result_post(post_id, post, user.id)
     except:
-        return "No user as this in DB!"
+        return "No post as this in DB!"
 
     return result
 
@@ -51,9 +56,10 @@ def get_post_by_id(post_id: int, database=Depends(connect_db)):
 @router.get("/get/comment/by/id/{comment_id}")
 def get_post_by_id(comment_id: int, database=Depends(connect_db)):
     comment = database.query(Comments).filter(Comments.id == comment_id).one_or_none()
+    user = database.query(User).filter(User.email == comment.author_email).one_or_none()
 
     try:
-        result = result_post(comment_id, comment)
+        result = result_comment(comment_id, comment, user.id)
     except:
         return "No comment as this in DB!"
 
