@@ -68,5 +68,5 @@ class Comments(Base):
     author_email = Column(String, ForeignKey("users.email"))
     comment_text = Column(String)
     user_id = Column(Integer, ForeignKey("users.id"))
-    post_id = Column(Integer, ForeignKey("post.id"))
+    post_id = Column(Integer, ForeignKey("posts.id"))
     created_at = Column(String, default=datetime.utcnow())

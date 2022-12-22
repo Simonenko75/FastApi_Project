@@ -136,11 +136,11 @@ def create_comment(comment: CommentCreateForm = Body(..., ember=True), database=
 
     if user and post:
         new_comment = Comments(
-            title=post.title,
-            subtitle=post.subtitle,
-            author=user.first_name,
+            title=comment.title,
+            subtitle=comment.subtitle,
+            author_comment=user.first_name,
             author_email=comment.author_email,
-            content=comment.comment_text,
+            comment_text=comment.comment_text,
             user_id=user.id,
             post_id=post.id
         )
@@ -148,7 +148,7 @@ def create_comment(comment: CommentCreateForm = Body(..., ember=True), database=
         database.add(new_comment)
         database.commit()
 
-        comment1 = database.query(Posts).filter(Comments.comment_text == comment.comment_text).one_or_none()
+        comment1 = database.query(Comments).filter(Comments.comment_text == comment.comment_text).one_or_none()
         try:
             result = result_comment(comment1.id, comment, user.first_name)
         except:
@@ -225,7 +225,7 @@ def update_post(post_id: int, post: PostCreateForm = Body(..., ember=True), data
 
 
 @router.put("/update/comment/{comment_id}")
-def update_post(comment_id: int, comment: CommentCreateForm = Body(..., ember=True), database=Depends(connect_db)):
+def update_comment(comment_id: int, comment: CommentCreateForm = Body(..., ember=True), database=Depends(connect_db)):
     user = database.query(User).filter(User.email == comment.author_email).one_or_none()
     post = database.query(Posts).filter(Posts.title == comment.title, Posts.subtitle == comment.subtitle).one_or_none()
 
@@ -235,9 +235,9 @@ def update_post(comment_id: int, comment: CommentCreateForm = Body(..., ember=Tr
             .where(Comments.id == comment_id)
             .values(title=comment.title)
             .values(subtitle=comment.subtitle)
-            .values(author=user.first_name)
+            .values(author_comment=user.first_name)
             .values(author_email=comment.author_email)
-            .values(content=comment.comment_text)
+            .values(comment_text=comment.comment_text)
             .values(created_at=datetime.now())
             .execution_options(synchronize_session="fetch")
         )
@@ -296,7 +296,7 @@ def delete_post(post_id: int, database=Depends(connect_db)):
 
 @router.delete("/delete/comment/{comment_id}")
 def delete_post(comment_id: int, database=Depends(connect_db)):
-    exists_comment = database.query(Posts).filter(Posts.id == comment_id).one_or_none()
+    exists_comment = database.query(Comments).filter(Comments.id == comment_id).one_or_none()
 
     if exists_comment:
         stmt = (
