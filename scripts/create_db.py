@@ -38,20 +38,14 @@ def main():
 
     session.execute("""create table comments (
         id integer not null primary key,
+        title varchar(256),
+        subtitle varchar(256),
         author_comment varchar(256) references users,
         comment_text varchar(256),
         user_id integer references users,
+        post_id integer references posts,
         created_at varchar(256)
         );""")
-
-    session.execute("""create table stream (
-    id integer not null primary key,
-    user_id integer references users,
-    title varchar(256),
-    topic varchar(256),
-    status varchar(256),
-    created_at varchar(256)
-    );""")
 
     session.close()
 

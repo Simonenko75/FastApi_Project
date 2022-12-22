@@ -24,5 +24,7 @@ class PostCreateForm(BaseModel):
 
 
 class CommentCreateForm(BaseModel):
+    title: str
+    subtitle: Optional[str] = None
     author_email: str
     comment_text: str

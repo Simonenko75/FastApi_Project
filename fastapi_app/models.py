@@ -62,19 +62,11 @@ class Comments(Base):
     __tablename__ = "comments"
 
     id = Column(Integer, primary_key=True)
+    title = Column(String)
+    subtitle = Column(String)
     author_comment = Column(String, ForeignKey("users.first_name"))
     author_email = Column(String, ForeignKey("users.email"))
     comment_text = Column(String)
     user_id = Column(Integer, ForeignKey("users.id"))
-    created_at = Column(String, default=datetime.utcnow())
-
-
-class Stream(Base):
-    __tablename__ = "stream"
-
-    id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey("users.id"))
-    title = Column(String)
-    topic = Column(String)
-    status = Column(String, default=StreamStatus.PLANED.value)
+    post_id = Column(Integer, ForeignKey("post.id"))
     created_at = Column(String, default=datetime.utcnow())

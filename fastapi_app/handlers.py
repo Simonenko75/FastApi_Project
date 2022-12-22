@@ -132,13 +132,17 @@ def create_post(post: PostCreateForm = Body(..., ember=True), database=Depends(c
 @router.post("/create/comment")
 def create_comment(comment: CommentCreateForm = Body(..., ember=True), database=Depends(connect_db)):
     user = database.query(User).filter(User.email == comment.author_email).one_or_none()
+    post = database.query(Posts).filter(Posts.title == comment.title, Posts.subtitle == comment.subtitle).one_or_none()
 
-    if user:
+    if user and post:
         new_comment = Comments(
+            title=post.title,
+            subtitle=post.subtitle,
             author=user.first_name,
             author_email=comment.author_email,
             content=comment.comment_text,
-            user_id=user.id
+            user_id=user.id,
+            post_id=post.id
         )
 
         database.add(new_comment)
@@ -223,11 +227,14 @@ def update_post(post_id: int, post: PostCreateForm = Body(..., ember=True), data
 @router.put("/update/comment/{comment_id}")
 def update_post(comment_id: int, comment: CommentCreateForm = Body(..., ember=True), database=Depends(connect_db)):
     user = database.query(User).filter(User.email == comment.author_email).one_or_none()
+    post = database.query(Posts).filter(Posts.title == comment.title, Posts.subtitle == comment.subtitle).one_or_none()
 
-    if user:
+    if user and post:
         stmt = (
             update(Comments)
             .where(Comments.id == comment_id)
+            .values(title=comment.title)
+            .values(subtitle=comment.subtitle)
             .values(author=user.first_name)
             .values(author_email=comment.author_email)
             .values(content=comment.comment_text)
