@@ -23,9 +23,9 @@ def main():
         title varchar(256),
         subtitle varchar(256),
         author varchar(256) references users,
-        created_at varchar(256),
         content varchar(256),
-        completed varchar(256)
+        completed varchar(256),
+        created_at varchar(256)
         );""")
 
     session.execute("""create table auth_token (

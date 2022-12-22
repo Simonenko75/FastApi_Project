@@ -41,9 +41,20 @@ class Posts(Base):
     id = Column(Integer, primary_key=True)
     title = Column(String)
     subtitle = Column(String)
-    author = Column(String, ForeignKey("users.first_name"), default="Nikita75")
+    author = Column(String, ForeignKey("users.first_name"))
+    author_email = Column(String, ForeignKey("users.email"))
     content = Column(String)
     completed = Column(Boolean)
+    user_id = Column(Integer, ForeignKey("users.id"))
+    created_at = Column(String, default=datetime.utcnow())
+
+
+class AuthToken(Base):
+    __tablename__ = "auth_token"
+
+    id = Column(Integer, primary_key=True)
+    token = Column(String)
+    user_id = Column(Integer, ForeignKey("users.id"))
     created_at = Column(String, default=datetime.utcnow())
 
 
@@ -55,13 +66,4 @@ class Stream(Base):
     title = Column(String)
     topic = Column(String)
     status = Column(String, default=StreamStatus.PLANED.value)
-    created_at = Column(String, default=datetime.utcnow())
-
-
-class AuthToken(Base):
-    __tablename__ = "auth_token"
-
-    id = Column(Integer, primary_key=True)
-    token = Column(String)
-    user_id = Column(Integer, ForeignKey("users.id"))
     created_at = Column(String, default=datetime.utcnow())

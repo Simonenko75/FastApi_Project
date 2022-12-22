@@ -19,5 +19,6 @@ class PostCreateForm(BaseModel):
     title: str
     subtitle: Optional[str] = None
     author: str
+    author_email: str
     content: str
     completed: bool

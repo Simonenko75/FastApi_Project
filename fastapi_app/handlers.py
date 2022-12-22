@@ -7,7 +7,7 @@ from sqlalchemy import update, delete
 
 from fastapi_app.forms import UserLoginForm, UserCreateForm, PostCreateForm
 from fastapi_app.models import connect_db, User, AuthToken, Posts
-from fastapi_app.utils import get_password_hash, result_user, result_post
+from fastapi_app.utils import get_password_hash, result_user, result_post, login_auto
 from fastapi_app.auth import check_auth_token
 
 
@@ -50,9 +50,9 @@ def get_post_by_id(post_id: int, database=Depends(connect_db)):
 
 
 @router.post("/login")
-def login(user_form: UserLoginForm = Body(..., embed=True), database=Depends(connect_db)):
-    user = database.query(User).filter(User.email == user_form.email).one_or_none()
-    if not user or get_password_hash(user_form.password) != user.password:
+def login(login_form: UserLoginForm = Body(..., embed=True), database=Depends(connect_db)):
+    user = database.query(User).filter(User.email == login_form.email).one_or_none()
+    if not user or get_password_hash(login_form.password) != user.password:
         return {"error": "Email/password invalid"}
 
     auth_token = AuthToken(token=str(uuid.uuid4()), user_id=user.id)
@@ -77,35 +77,51 @@ def create_user(user: UserCreateForm = Body(..., ember=True), database=Depends(c
     database.add(new_user)
     database.commit()
 
+    user_login = User(
+        email=user.email,
+        password=user.password
+    )
+
+    auth_token = login_auto(user_login, database)
+
     user1 = database.query(User).filter(User.email == user.email).one_or_none()
     try:
         result = result_user(user1.id, user)
     except:
         return "No post as this in DB!"
 
-    return result
+    return result, {"auth_token": auth_token}
 
 
 @router.post("/create/post")
 def create_post(post: PostCreateForm = Body(..., ember=True), database=Depends(connect_db)):
+    user = database.query(User).filter(User.email == post.author_email, User.first_name == post.author).one_or_none()
 
-    new_post = Posts(
-        title=post.title,
-        subtitle=post.subtitle,
-        author=post.author,
-        content=post.content,
-        completed=post.completed
-    )
-    database.add(new_post)
-    database.commit()
+    if user:
+        new_post = Posts(
+            title=post.title,
+            subtitle=post.subtitle,
+            author=post.author,
+            author_email=post.author_email,
+            content=post.content,
+            completed=post.completed,
+            user_id=user.id
+        )
 
-    post1 = database.query(Posts).filter(Posts.content == post.content).one_or_none()
-    try:
-        result = result_post(post1.id, post)
-    except:
-        return "No post as this in DB!"
+        database.add(new_post)
+        database.commit()
 
-    return result
+        post1 = database.query(Posts).filter(Posts.content == post.content).one_or_none()
+        try:
+            result = result_post(post1.id, post)
+        except:
+            return "No post as this in DB!"
+
+        return result
+    else:
+        return "User with this email and name not exists!" '\n'\
+               "Before You must create user. '\n'" \
+               "Probable You have some mistakes, check please."
 
 
 @router.put("/update/user/{user_id}")
