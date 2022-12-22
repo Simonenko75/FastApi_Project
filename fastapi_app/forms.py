@@ -10,7 +10,7 @@ class UserLoginForm(BaseModel):
 class UserCreateForm(BaseModel):
     email: str
     password: str
-    first_name: Optional[str] = None
+    first_name: str
     last_name: Optional[str] = None
     nickname: Optional[str] = None
 

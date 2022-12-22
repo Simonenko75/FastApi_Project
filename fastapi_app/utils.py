@@ -2,7 +2,6 @@ import hashlib
 import uuid
 
 from fastapi_app.config import SECRET_KEY
-from fastapi_app.forms import UserLoginForm
 from fastapi_app.models import User, AuthToken
 
 
@@ -37,7 +36,7 @@ def result_post(post_id, post):
     }
 
 
-def login_auto(login_form: UserLoginForm, database):
+def login_auto(login_form, database):
     user = database.query(User).filter(User.email == login_form.email).one_or_none()
     if not user or get_password_hash(login_form.password) != user.password:
         return {"error": "Email/password invalid"}
@@ -46,3 +45,17 @@ def login_auto(login_form: UserLoginForm, database):
     database.add(auth_token)
     database.commit()
     return {"auth_token": auth_token.token}
+
+
+def return_token(user_id, user, database):
+    auth_token = database.query(AuthToken).filter(AuthToken.user_id == user_id).one_or_none()
+
+    if not auth_token:
+        user_login = User(
+            email=user.email,
+            password=user.password
+        )
+
+        token = login_auto(user_login, database)
+        return token
+    return auth_token.token

@@ -7,7 +7,7 @@ from sqlalchemy import update, delete
 
 from fastapi_app.forms import UserLoginForm, UserCreateForm, PostCreateForm
 from fastapi_app.models import connect_db, User, AuthToken, Posts
-from fastapi_app.utils import get_password_hash, result_user, result_post, login_auto
+from fastapi_app.utils import get_password_hash, result_user, result_post, login_auto, return_token
 from fastapi_app.auth import check_auth_token
 
 
@@ -95,7 +95,7 @@ def create_user(user: UserCreateForm = Body(..., ember=True), database=Depends(c
 
 @router.post("/create/post")
 def create_post(post: PostCreateForm = Body(..., ember=True), database=Depends(connect_db)):
-    user = database.query(User).filter(User.email == post.author_email, User.first_name == post.author).one_or_none()
+    user = database.query(User).filter(User.email == post.author_email).one_or_none()
 
     if user:
         new_post = Posts(
@@ -119,84 +119,107 @@ def create_post(post: PostCreateForm = Body(..., ember=True), database=Depends(c
 
         return result
     else:
-        return "User with this email and name not exists!" '\n'\
+        return "User with this email not exists!" '\n'\
                "Before You must create user. '\n'" \
                "Probable You have some mistakes, check please."
 
 
 @router.put("/update/user/{user_id}")
 def update_user(user_id: int, user: UserCreateForm = Body(..., ember=True), database=Depends(connect_db)):
-    stmt = (
-        update(User)
-        .where(User.id == user_id)
-        .values(email=user.email)
-        .values(password=get_password_hash(user.password))
-        .values(first_name=user.first_name)
-        .values(last_name=user.last_name)
-        .values(nickname=user.nickname)
-        .values(created_at=datetime.now())
-        .execution_options(synchronize_session="fetch")
-    )
+    user_correct = database.query(User).filter(User.email == user.email).one_or_none()
+    if user_correct:
+        stmt = (
+            update(User)
+            .where(User.id == user_id)
+            .values(email=user.email)
+            .values(password=get_password_hash(user.password))
+            .values(first_name=user.first_name)
+            .values(last_name=user.last_name)
+            .values(nickname=user.nickname)
+            .values(created_at=datetime.now())
+            .execution_options(synchronize_session="fetch")
+        )
 
-    database.execute(stmt)
-    database.commit()
+        database.execute(stmt)
+        database.commit()
 
-    try:
-        result = result_user(user_id, user)
-    except:
-        return "No user as this in DB!"
+        token = return_token(user_id, user, database)
 
-    return result
+        try:
+            result = result_user(user_id, user)
+        except:
+            return "No user as this in DB!"
+
+        return result, {"auth_token": token}
+    else:
+        return "User with this email not correct!" '\n'\
+               "Probable You have some mistakes, check email please."
 
 
 @router.put("/update/post/{post_id}")
 def update_post(post_id: int, post: PostCreateForm = Body(..., ember=True), database=Depends(connect_db)):
-    stmt = (
-        update(Posts)
-        .where(Posts.id == post_id)
-        .values(title=post.title)
-        .values(subtitle=post.subtitle)
-        .values(author=post.author)
-        .values(content=post.content,)
-        .values(completed=post.completed)
-        .values(created_at=datetime.now())
-        .execution_options(synchronize_session="fetch")
-    )
+    user = database.query(User).filter(User.email == post.author_email).one_or_none()
 
-    database.execute(stmt)
-    database.commit()
+    if user:
+        stmt = (
+            update(Posts)
+            .where(Posts.id == post_id)
+            .values(title=post.title)
+            .values(subtitle=post.subtitle)
+            .values(author=post.author)
+            .values(content=post.content,)
+            .values(completed=post.completed)
+            .values(created_at=datetime.now())
+            .execution_options(synchronize_session="fetch")
+        )
 
-    try:
-        result = result_post(post_id, post)
-    except:
-        return "No user as this in DB!"
+        database.execute(stmt)
+        database.commit()
 
-    return result
+        try:
+            result = result_post(post_id, post)
+        except:
+            return "No user as this in DB!"
+
+        return result
+    else:
+        return "User with this email not exists!" '\n'\
+               "Probable You have some mistakes, check please."
 
 
 @router.delete("/delete/user/{user_id}")
 def delete_user(user_id: int, database=Depends(connect_db)):
-    stmt = (
-        delete(User)
-        .where(User.id == user_id)
-        .execution_options(synchronize_session="fetch")
-    )
+    exists_user = database.query(User).filter(User.id == user_id).one_or_none()
 
-    database.execute(stmt)
-    database.commit()
+    if exists_user:
+        stmt = (
+            delete(User)
+            .where(User.id == user_id)
+            .execution_options(synchronize_session="fetch")
+        )
 
-    return {"Result": f"Successful delete user with id: {user_id}"}
+        database.execute(stmt)
+        database.commit()
+
+        return {"Result": f"Successful delete user with id: {user_id}"}
+    else:
+        return "Please try again, but with correct id. User with this id is not in DB!"
 
 
 @router.delete("/delete/post/{post_id}")
 def delete_post(post_id: int, database=Depends(connect_db)):
-    stmt = (
-        delete(Posts)
-        .where(Posts.id == post_id)
-        .execution_options(synchronize_session="fetch")
-    )
+    exists_post = database.query(Posts).filter(Posts.id == post_id).one_or_none()
 
-    database.execute(stmt)
-    database.commit()
+    if exists_post:
+        stmt = (
+            delete(Posts)
+            .where(Posts.id == post_id)
+            .execution_options(synchronize_session="fetch")
+        )
 
-    return {"Result": f"Successful delete post with id: {post_id}"}
+        database.execute(stmt)
+        database.commit()
+
+        return {"Result": f"Successful delete post with id: {post_id}"}
+    else:
+        return "Please try again, but with correct id. post with this id is not in DB!"
