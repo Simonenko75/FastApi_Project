@@ -1,11 +1,10 @@
-import uuid
 from datetime import datetime
 from fastapi import APIRouter, Body, Depends, HTTPException
 from starlette import status
 
 from sqlalchemy import update, delete
 
-from fastapi_app.forms import UserLoginForm, UserCreateForm, PostCreateForm
+from fastapi_app.forms import UserCreateForm, PostCreateForm
 from fastapi_app.models import connect_db, User, AuthToken, Posts
 from fastapi_app.utils import get_password_hash, result_user, result_post, login_auto, return_token
 from fastapi_app.auth import check_auth_token
@@ -47,18 +46,6 @@ def get_post_by_id(post_id: int, database=Depends(connect_db)):
         return "No user as this in DB!"
 
     return result
-
-
-@router.post("/login")
-def login(login_form: UserLoginForm = Body(..., embed=True), database=Depends(connect_db)):
-    user = database.query(User).filter(User.email == login_form.email).one_or_none()
-    if not user or get_password_hash(login_form.password) != user.password:
-        return {"error": "Email/password invalid"}
-
-    auth_token = AuthToken(token=str(uuid.uuid4()), user_id=user.id)
-    database.add(auth_token)
-    database.commit()
-    return {"auth_token": auth_token.token}
 
 
 @router.post("/create/user")
@@ -126,7 +113,7 @@ def create_post(post: PostCreateForm = Body(..., ember=True), database=Depends(c
 
 @router.put("/update/user/{user_id}")
 def update_user(user_id: int, user: UserCreateForm = Body(..., ember=True), database=Depends(connect_db)):
-    user_correct = database.query(User).filter(User.email == user.email).one_or_none()
+    user_correct = database.query(User).filter(User.id == user_id).one_or_none()
     if user_correct:
         stmt = (
             update(User)
@@ -167,7 +154,8 @@ def update_post(post_id: int, post: PostCreateForm = Body(..., ember=True), data
             .values(title=post.title)
             .values(subtitle=post.subtitle)
             .values(author=post.author)
-            .values(content=post.content,)
+            .values(author_email=post.author_email)
+            .values(content=post.content)
             .values(completed=post.completed)
             .values(created_at=datetime.now())
             .execution_options(synchronize_session="fetch")
