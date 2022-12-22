@@ -18,7 +18,11 @@ class UserCreateForm(BaseModel):
 class PostCreateForm(BaseModel):
     title: str
     subtitle: Optional[str] = None
-    author: str
     author_email: str
     content: str
     completed: bool
+
+
+class CommentCreateForm(BaseModel):
+    author_email: str
+    comment_text: str

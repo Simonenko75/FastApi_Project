@@ -22,16 +22,27 @@ def result_user(user_id, user):
     }
 
 
-def result_post(post_id, post):
+def result_post(post_id, post, user_name):
     return {
         "Post": {
             "post_id": post_id,
             "post_title": post.title,
             "post_subtitle": post.subtitle,
-            "post_author": post.author,
+            "post_author": user_name,
             "post_author_email": post.author_email,
             "post_content": post.content,
             "post_completed": post.completed
+        }
+    }
+
+
+def result_comment(comment_id, comment, user_name):
+    return {
+        "Comment": {
+            "comment_id": comment_id,
+            "comment_author": user_name,
+            "author_email": comment.author_email,
+            "comment_text": comment.comment_text
         }
     }
 

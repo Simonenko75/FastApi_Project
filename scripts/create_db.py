@@ -25,6 +25,7 @@ def main():
         author varchar(256) references users,
         content varchar(256),
         completed varchar(256),
+        user_id integer references users,
         created_at varchar(256)
         );""")
 
@@ -34,6 +35,14 @@ def main():
     user_id integer references users,
     created_at varchar(256)
     );""")
+
+    session.execute("""create table comments (
+        id integer not null primary key,
+        author_comment varchar(256) references users,
+        comment_text varchar(256),
+        user_id integer references users,
+        created_at varchar(256)
+        );""")
 
     session.execute("""create table stream (
     id integer not null primary key,

@@ -4,9 +4,9 @@ from starlette import status
 
 from sqlalchemy import update, delete
 
-from fastapi_app.forms import UserCreateForm, PostCreateForm
-from fastapi_app.models import connect_db, User, AuthToken, Posts
-from fastapi_app.utils import get_password_hash, result_user, result_post, login_auto, return_token
+from fastapi_app.forms import UserCreateForm, PostCreateForm, CommentCreateForm
+from fastapi_app.models import connect_db, User, AuthToken, Posts, Comments
+from fastapi_app.utils import get_password_hash, result_user, result_post, login_auto, return_token, result_comment
 from fastapi_app.auth import check_auth_token
 
 
@@ -44,6 +44,18 @@ def get_post_by_id(post_id: int, database=Depends(connect_db)):
         result = result_post(post_id, post)
     except:
         return "No user as this in DB!"
+
+    return result
+
+
+@router.get("/get/comment/by/id/{comment_id}")
+def get_post_by_id(comment_id: int, database=Depends(connect_db)):
+    comment = database.query(Comments).filter(Comments.id == comment_id).one_or_none()
+
+    try:
+        result = result_post(comment_id, comment)
+    except:
+        return "No comment as this in DB!"
 
     return result
 
@@ -88,7 +100,7 @@ def create_post(post: PostCreateForm = Body(..., ember=True), database=Depends(c
         new_post = Posts(
             title=post.title,
             subtitle=post.subtitle,
-            author=post.author,
+            author=user.first_name,
             author_email=post.author_email,
             content=post.content,
             completed=post.completed,
@@ -100,7 +112,7 @@ def create_post(post: PostCreateForm = Body(..., ember=True), database=Depends(c
 
         post1 = database.query(Posts).filter(Posts.content == post.content).one_or_none()
         try:
-            result = result_post(post1.id, post)
+            result = result_post(post1.id, post, user.first_name)
         except:
             return "No post as this in DB!"
 
@@ -108,6 +120,33 @@ def create_post(post: PostCreateForm = Body(..., ember=True), database=Depends(c
     else:
         return "User with this email not exists!" '\n'\
                "Before You must create user. '\n'" \
+               "Probable You have some mistakes, check please."
+
+
+@router.post("/create/comment")
+def create_comment(comment: CommentCreateForm = Body(..., ember=True), database=Depends(connect_db)):
+    user = database.query(User).filter(User.email == comment.author_email).one_or_none()
+
+    if user:
+        new_comment = Comments(
+            author=user.first_name,
+            author_email=comment.author_email,
+            content=comment.comment_text,
+            user_id=user.id
+        )
+
+        database.add(new_comment)
+        database.commit()
+
+        comment1 = database.query(Posts).filter(Comments.comment_text == comment.comment_text).one_or_none()
+        try:
+            result = result_comment(comment1.id, comment, user.first_name)
+        except:
+            return "No comment as this in DB!"
+
+        return result
+    else:
+        return "Comment with this email not exists!" '\n'\
                "Probable You have some mistakes, check please."
 
 
@@ -153,7 +192,7 @@ def update_post(post_id: int, post: PostCreateForm = Body(..., ember=True), data
             .where(Posts.id == post_id)
             .values(title=post.title)
             .values(subtitle=post.subtitle)
-            .values(author=post.author)
+            .values(author=user.first_name)
             .values(author_email=post.author_email)
             .values(content=post.content)
             .values(completed=post.completed)
@@ -165,13 +204,42 @@ def update_post(post_id: int, post: PostCreateForm = Body(..., ember=True), data
         database.commit()
 
         try:
-            result = result_post(post_id, post)
+            result = result_post(post_id, post, user.first_name)
         except:
-            return "No user as this in DB!"
+            return "No post as this in DB!"
 
         return result
     else:
-        return "User with this email not exists!" '\n'\
+        return "Post with this email not exists!" '\n'\
+               "Probable You have some mistakes, check please."
+
+
+@router.put("/update/comment/{comment_id}")
+def update_post(comment_id: int, comment: CommentCreateForm = Body(..., ember=True), database=Depends(connect_db)):
+    user = database.query(User).filter(User.email == comment.author_email).one_or_none()
+
+    if user:
+        stmt = (
+            update(Comments)
+            .where(Comments.id == comment_id)
+            .values(author=user.first_name)
+            .values(author_email=comment.author_email)
+            .values(content=comment.comment_text)
+            .values(created_at=datetime.now())
+            .execution_options(synchronize_session="fetch")
+        )
+
+        database.execute(stmt)
+        database.commit()
+
+        try:
+            result = result_comment(comment_id, comment, user.first_name)
+        except:
+            return "No comment as this in DB!"
+
+        return result
+    else:
+        return "Comment with this email not exists!" '\n'\
                "Probable You have some mistakes, check please."
 
 
@@ -210,4 +278,23 @@ def delete_post(post_id: int, database=Depends(connect_db)):
 
         return {"Result": f"Successful delete post with id: {post_id}"}
     else:
-        return "Please try again, but with correct id. post with this id is not in DB!"
+        return "Please try again, but with correct id. Post with this id is not in DB!"
+
+
+@router.delete("/delete/comment/{comment_id}")
+def delete_post(comment_id: int, database=Depends(connect_db)):
+    exists_comment = database.query(Posts).filter(Posts.id == comment_id).one_or_none()
+
+    if exists_comment:
+        stmt = (
+            delete(Comments)
+            .where(Comments.id == comment_id)
+            .execution_options(synchronize_session="fetch")
+        )
+
+        database.execute(stmt)
+        database.commit()
+
+        return {"Result": f"Successful delete comment with id: {comment_id}"}
+    else:
+        return "Please try again, but with correct id. Comment with this id is not in DB!"
