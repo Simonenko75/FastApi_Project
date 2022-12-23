@@ -13,4 +13,4 @@ jobs:
     steps:
       - user: actions/checout@2
       - name: run-tests
-        run: test_api.py
+        run: ./test/test_api.py
