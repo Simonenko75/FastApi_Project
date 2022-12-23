@@ -8,28 +8,27 @@ on:
 
 jobs:
   build:
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version: [ "3.6", "3.7", "3.8", "3.9", "3.10" ]
-        poetry-version: [ "1.0", "1.1.15" ]
-        os: [ ubuntu-18.04, macos-latest, windows-latest ]
-      runs-on: ${{ matrix.os }}
-      steps:
-        - uses: actions/checkout@v3
-        - uses: actions/setup-python@v4
-          with:
-            python-version: ${{ matrix.python-version }}
-        - uses: abatilo/actions-poetry@v2
-          with:
-            poetry-version: ${{ matrix.poetry-version }}
-        - name: run-ls
-          run: ls -la
-        - name: run-app
-          run: |
-            uvicorn fastapi_app.main:app --reload
-        - name: run-tests
-          run: ./tests/test_api.py
+    name: Ubuntu
+    matrix:
+      python-version: "3.10"
+      poetry-version: "1.2.2"
+
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+      - uses: abatilo/actions-poetry@v2
+        with:
+          poetry_version: ${{ matrix.poetry-version }}
+      - name: run-ls
+        run: ls -la
+      - name: run-app
+        run: |
+          uvicorn fastapi_app.main:app --reload
+      - name: run-tests
+        run: ./tests/test_api.py
 
 #    steps:
 #      - uses: actions/checkout@v2
@@ -43,3 +42,20 @@ jobs:
 #
 #      - name: run-tests
 #        run: ./tests/test_api.py
+
+
+#    strategy:
+#      fail-fast: false
+#      matrix:
+#        python-version: [ "3.6", "3.7", "3.8", "3.9", "3.10" ]
+#        poetry-version: [ "1.0", "1.1.15" ]
+#        os: [ ubuntu-18.04, macos-latest, windows-latest ]
+#      runs-on: ${{ matrix.os }}
+#      steps:
+#        - uses: actions/checkout@v3
+#        - uses: actions/setup-python@v4
+#          with:
+#            python-version: ${{ matrix.python-version }}
+#        - uses: abatilo/actions-poetry@v2
+#          with:
+#            poetry-version: ${{ matrix.poetry-version }}
