@@ -22,7 +22,7 @@ jobs:
         run: ls -la
       - name: run-app
         run: |
-          poetry add fastapi, uvicorn
+          poetry update package
           uvicorn fastapi_app.main:app --reload
       - name: run-tests
         run: ./tests/test_api.py
