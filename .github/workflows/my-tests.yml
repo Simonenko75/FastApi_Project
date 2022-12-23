@@ -8,13 +8,14 @@ on:
 
 jobs:
   build:
+    name: ubuntu download
     run-on: ubuntu-latest
 
     steps:
       - user: actions/checout@v2
 
       - name: run-ls
-        run: ls -lah
+        run: ls -la
 
       - name: run-tests
         run: ./tests/test_api.py
