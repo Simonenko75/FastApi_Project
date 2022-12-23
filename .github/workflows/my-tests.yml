@@ -32,7 +32,7 @@ jobs:
       - uses: actions/checkout@v3
       - name: Run app
         run: |
-          uvicorn fastapi_app.main:app --reload
+          docker-compose up
       - name: run-tests
         run: ./tests/test_api.py
 
