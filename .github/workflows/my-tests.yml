@@ -1,1 +1,16 @@
 
+name: My-tests-fast-api
+
+on:
+  push:
+    branches: main
+
+jobs:
+  build:
+
+    run-on: ubuntu-latest
+
+    steps:
+      - user: actions/checout@2
+      - name: run-tests
+        run: test_api.py
