@@ -3,15 +3,18 @@ name: My-tests-fast-api
 
 on:
   push:
-    branches: main
+    branches:
+      - main
 
 jobs:
   build:
-
     run-on: ubuntu-latest
 
     steps:
       - user: actions/checout@v2
-#      - user: actions/setup-python@v1
+
+      - name: run-ls
+        run: ls -lah
+
       - name: run-tests
         run: ./test/test_api.py
