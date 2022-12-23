@@ -34,7 +34,10 @@ jobs:
         run: |
           docker-compose up
       - name: run-tests
-        run: ./tests/test_api.py
+        run: |
+          cd tests
+          ls -la
+          test_api.py
 
 #    steps:
 #      - uses: actions/checkout@v2
