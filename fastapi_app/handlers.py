@@ -9,7 +9,6 @@ from fastapi_app.models import connect_db, User, AuthToken, Posts, Comments
 from fastapi_app.utils import get_password_hash, result_user, result_post, login_auto, return_token, result_comment
 from fastapi_app.auth import check_auth_token
 
-
 router = APIRouter()
 
 
@@ -124,7 +123,7 @@ def create_post(post: PostCreateForm = Body(..., ember=True), database=Depends(c
 
         return result
     else:
-        return "User with this email not exists!" '\n'\
+        return "User with this email not exists!" '\n' \
                "Before You must create user. '\n'" \
                "Probable You have some mistakes, check please."
 
@@ -156,7 +155,7 @@ def create_comment(comment: CommentCreateForm = Body(..., ember=True), database=
 
         return result
     else:
-        return "Comment with this email not exists!" '\n'\
+        return "Comment with this email not exists!" '\n' \
                "Probable You have some mistakes, check please."
 
 
@@ -188,7 +187,7 @@ def update_user(user_id: int, user: UserCreateForm = Body(..., ember=True), data
 
         return result, {"auth_token": token}
     else:
-        return "User with this email not correct!" '\n'\
+        return "User with this email not correct!" '\n' \
                "Probable You have some mistakes, check email please."
 
 
@@ -220,7 +219,7 @@ def update_post(post_id: int, post: PostCreateForm = Body(..., ember=True), data
 
         return result
     else:
-        return "Post with this email not exists!" '\n'\
+        return "Post with this email not exists!" '\n' \
                "Probable You have some mistakes, check please."
 
 
@@ -252,7 +251,7 @@ def update_comment(comment_id: int, comment: CommentCreateForm = Body(..., ember
 
         return result
     else:
-        return "Comment with this email not exists!" '\n'\
+        return "Comment with this email not exists!" '\n' \
                "Probable You have some mistakes, check please."
 
 
@@ -267,7 +266,14 @@ def delete_user(user_id: int, database=Depends(connect_db)):
             .execution_options(synchronize_session="fetch")
         )
 
+        stmt1 = (
+            delete(AuthToken)
+            .where(AuthToken.user_id == user_id)
+            .execution_options(synchronize_session="fetch")
+        )
+
         database.execute(stmt)
+        database.execute(stmt1)
         database.commit()
 
         return {"Result": f"Successful delete user with id: {user_id}"}
