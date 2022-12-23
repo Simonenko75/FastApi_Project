@@ -23,6 +23,7 @@ jobs:
       - name: run-app
         run: |
           poetry update package
+          ls -la
           uvicorn fastapi_app.main:app --reload
       - name: run-tests
         run: ./tests/test_api.py
