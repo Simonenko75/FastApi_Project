@@ -11,6 +11,7 @@ jobs:
     run-on: ubuntu-latest
 
     steps:
-      - user: actions/checout@2
+      - user: actions/checout@v2
+#      - user: actions/setup-python@v1
       - name: run-tests
         run: ./test/test_api.py
