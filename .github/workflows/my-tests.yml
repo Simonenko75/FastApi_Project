@@ -33,7 +33,7 @@ jobs:
       - name: Run app
         run: |
           ls -la
-          docker-compose up
+          uvicorn fastapi_app.main:app --reload
       - name: run-tests
         run: |
           cd tests
