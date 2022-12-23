@@ -9,7 +9,7 @@ on:
 jobs:
   build:
     name: ubuntu download
-    run-on: ubuntu-latest
+    runs-on: ubuntu-latest
 
     steps:
       - user: actions/checout@v2
