@@ -119,5 +119,21 @@ class APITestCase(unittest.TestCase):
     #     response = self.client.put("/update/comment/3", json=post_data)
     #     self.assertEqual(response.status_code, 200)
 
+    """Для проверки получения пользователя надо использовать существующий id"""
+    # def test_delete_user_by_id_url(self):
+    #     response = self.client.delete("/delete/user/6")
+    #     self.assertEqual(response.status_code, 200)
+
+    """Для проверки получения поста надо использовать существующий id"""
+    # def test_delete_post_by_id_url(self):
+    #     response = self.client.delete("/delete/post/8")
+    #     self.assertEqual(response.status_code, 200)
+
+    """Для проверки получения коментария надо использовать существующий id"""
+    # def test_delete_comment_by_id_url(self):
+    #     response = self.client.delete("/delete/comment/5")
+    #     self.assertEqual(response.status_code, 200)
+
+
 if __name__ == '__main__':
     unittest.main()
