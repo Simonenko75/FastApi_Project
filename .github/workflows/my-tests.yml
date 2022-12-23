@@ -32,6 +32,7 @@ jobs:
       - uses: actions/checkout@v3
       - name: Run app
         run: |
+          ls -la
           docker-compose up
       - name: run-tests
         run: |
