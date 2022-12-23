@@ -17,4 +17,4 @@ jobs:
         run: ls -lah
 
       - name: run-tests
-        run: ./test/test_api.py
+        run: ./tests/test_api.py
