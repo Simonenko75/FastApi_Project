@@ -24,9 +24,10 @@ jobs:
       - name: run-ls
         run: ls -la
       - name: test-app
-        run: python test_api.py ./tests/
+        run: |
+          cd tests
+          python test_api.py
 
-  
   
 
 #  build:
@@ -48,19 +49,4 @@ jobs:
 #      - name: test-app
 #        run: |
 #          cd tests \
-#          python test_api.py
-#
-#  app:
-#    name: FastApi
-#    needs: build
-#    runs-on: ubuntu-latest
-#    steps:
-#      - uses: actions/checkout@v3
-#      - name: Run app
-#        run: |
-#          ls -la
-#      - name: run-tests
-#        run: |
-#          cd tests
-#          ls -la
 #          python test_api.py
