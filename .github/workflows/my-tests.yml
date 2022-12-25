@@ -22,7 +22,9 @@ jobs:
         with:
           poetry_version: "1.2.2"
       - name: run-ls
-        run: ls -la
+        run: |
+          poetry add fastapi, uvicorn, requests
+          ls -la
       - name: test-app
         run: |
           cd tests
