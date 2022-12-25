@@ -24,7 +24,7 @@ jobs:
       - name: test-app
         run: |
           cd tests
-          run test_api.py
+          python test_api.py
 
   
   
