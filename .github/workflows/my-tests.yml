@@ -18,7 +18,9 @@ jobs:
         with:
           python-version: "3.10"
       - name: install requirements
-        run: pip install -r requirements.txt
+        run: |
+          python -m install --upgrade pip
+          pip install -r requirements.txt
       - name: run-ls
         run: ls -la
       - name: test-app
