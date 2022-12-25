@@ -23,7 +23,7 @@ jobs:
           poetry_version: "1.2.2"
       - name: run-ls
         run: |
-          poetry add fastapi, uvicorn, requests
+          poetry add fastapi uvicorn requests unittest
           ls -la
       - name: test-app
         run: |
