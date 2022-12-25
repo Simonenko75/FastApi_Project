@@ -25,7 +25,7 @@ jobs:
         run: ls -la
       - name: test-app
         run: |
-          cd tests /
+          cd tests \
           python test_api.py
 
   app:
