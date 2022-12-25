@@ -11,21 +11,21 @@ jobs:
     name: Ubuntu
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
+      - name: Clone repo
+        uses: actions/checkout@v3
+      - name: setup python
+        uses: actions/setup-python@v4
         with:
           python-version: "3.10"
-      - uses: abatilo/actions-poetry@v2
+      - name: add poetry
+        uses: abatilo/actions-poetry@v2
         with:
           poetry_version: "1.2.2"
       - name: run-ls
         run: ls -la
-      - name: prep-app
+      - name: test-app
         run: |
-          poetry update package
-          uvicorn fastapi_app.main:app --reload
-          cd tests
-          ls -la
+          cd tests /
           python test_api.py
 
   app:
