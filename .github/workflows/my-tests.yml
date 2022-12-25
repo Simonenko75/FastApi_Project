@@ -12,15 +12,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Clone repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v2
       - name: setup python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v2
         with:
           python-version: "3.10"
-      - name: add poetry
-        uses: abatilo/actions-poetry@v2
-        with:
-          poetry_version: "1.2.2"
+      - name: install requirements
+        run: pip install -r requirements.txt
       - name: run-ls
         run: ls -la
       - name: test-app
@@ -28,17 +26,41 @@ jobs:
           cd tests \
           python test_api.py
 
-  app:
-    name: FastApi
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Run app
-        run: |
-          ls -la
-      - name: run-tests
-        run: |
-          cd tests
-          ls -la
-          python test_api.py
+  
+  
+
+#  build:
+#    name: Ubuntu
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: Clone repo
+#        uses: actions/checkout@v3
+#      - name: setup python
+#        uses: actions/setup-python@v4
+#        with:
+#          python-version: "3.10"
+#      - name: add poetry
+#        uses: abatilo/actions-poetry@v2
+#        with:
+#          poetry_version: "1.2.2"
+#      - name: run-ls
+#        run: ls -la
+#      - name: test-app
+#        run: |
+#          cd tests \
+#          python test_api.py
+#
+#  app:
+#    name: FastApi
+#    needs: build
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v3
+#      - name: Run app
+#        run: |
+#          ls -la
+#      - name: run-tests
+#        run: |
+#          cd tests
+#          ls -la
+#          python test_api.py
