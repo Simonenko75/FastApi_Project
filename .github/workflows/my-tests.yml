@@ -23,8 +23,8 @@ jobs:
         run: ls -la
       - name: test-app
         run: |
-          cd tests \
-          python test_api.py
+          cd tests
+          run test_api.py
 
   
   
